@@ -1,0 +1,164 @@
+[
+  {
+    "id": "M001",
+    "name": "Kingklip Grilled Fillet",
+    "description": "Fresh line-caught kingklip grilled to perfection with lemon butter",
+    "category": "Seafood Mains",
+    "price": 285.00,
+    "available": true,
+    "image": "kingklip.jpg"
+  },
+  {
+    "id": "M002",
+    "name": "West Coast Rock Lobster Tail",
+    "description": "Succulent lobster tail served with garlic aioli and seasonal vegetables",
+    "category": "Seafood Mains",
+    "price": 395.00,
+    "available": true,
+    "image": "lobster.jpg"
+  },
+  {
+    "id": "M003",
+    "name": "Snoek Pan-Fried",
+    "description": "Crispy snoek fillet served with SA lemon and herbs",
+    "category": "Seafood Mains",
+    "price": 245.00,
+    "available": true,
+    "image": "snoek.jpg"
+  },
+  {
+    "id": "M004",
+    "name": "Seafood Boil - King's Feast",
+    "description": "Lobster, crab, mussels, prawns, squid with crispy fries and coleslaw",
+    "category": "Seafood Mains",
+    "price": 520.00,
+    "available": true,
+    "image": "seafood_boil.jpg"
+  },
+  {
+    "id": "M005",
+    "name": "Bobotie Supreme",
+    "description": "Traditional Cape Malay spiced mince with eggs and turmeric rice",
+    "category": "SA Mains",
+    "price": 195.00,
+    "available": true,
+    "image": "bobotie.jpg"
+  },
+  {
+    "id": "M006",
+    "name": "Sosaties with Mango Chutney",
+    "description": "Grilled Cape kebabs with traditional mango chutney and rice",
+    "category": "SA Mains",
+    "price": 225.00,
+    "available": true,
+    "image": "sosaties.jpg"
+  },
+  {
+    "id": "M007",
+    "name": "Boerewors with Pap",
+    "description": "Traditional SA sausage served with creamy pap and chakalaka",
+    "category": "SA Mains",
+    "price": 185.00,
+    "available": true,
+    "image": "boerewors.jpg"
+  },
+  {
+    "id": "M008",
+    "name": "Potjiekos - Lamb Stew",
+    "description": "Slow-cooked lamb with potatoes, carrots and traditional spices",
+    "category": "SA Mains",
+    "price": 265.00,
+    "available": true,
+    "image": "potjiekos.jpg"
+  },
+  {
+    "id": "M009",
+    "name": "Biltong Salad",
+    "description": "Mixed greens with sliced biltong, roasted vegetables and vinaigrette",
+    "category": "Salads",
+    "price": 145.00,
+    "available": true,
+    "image": "biltong_salad.jpg"
+  },
+  {
+    "id": "M010",
+    "name": "Shrimp & Mango Salad",
+    "description": "Chilled prawns, fresh mango, avocado with citrus dressing",
+    "category": "Salads",
+    "price": 165.00,
+    "available": true,
+    "image": "shrimp_salad.jpg"
+  },
+  {
+    "id": "M011",
+    "name": "Garlic Butter Mussels",
+    "description": "Fresh mussels steamed in white wine, garlic and herbs",
+    "category": "Appetizers",
+    "price": 155.00,
+    "available": true,
+    "image": "mussels.jpg"
+  },
+  {
+    "id": "M012",
+    "name": "Grilled Prawns",
+    "description": "Jumbo prawns grilled with chilli and garlic butter",
+    "category": "Appetizers",
+    "price": 185.00,
+    "available": true,
+    "image": "prawns.jpg"
+  },
+  {
+    "id": "M013",
+    "name": "Calamari Rings",
+    "description": "Crispy fried squid rings with lemon and spicy dipping sauce",
+    "category": "Appetizers",
+    "price": 135.00,
+    "available": true,
+    "image": "calamari.jpg"
+  },
+  {
+    "id": "M014",
+    "name": "Milk Tart",
+    "description": "Traditional South African milk tart with cinnamon",
+    "category": "Desserts",
+    "price": 85.00,
+    "available": true,
+    "image": "melktert.jpg"
+  },
+  {
+    "id": "M015",
+    "name": "Koeksister",
+    "description": "Traditional spiced dough fried and coated with golden syrup",
+    "category": "Desserts",
+    "price": 65.00,
+    "available": true,
+    "image": "koeksister.jpg"
+  },
+  {
+    "id": "M016",
+    "name": "Malva Pudding",
+    "description": "Spiced sponge pudding served with hot caramel sauce and vanilla ice cream",
+    "category": "Desserts",
+    "price": 95.00,
+    "available": true,
+    "image": "malva.jpg"
+  },
+  {
+    "id": "M017",
+    "name": "House Wine Selection",
+    "description": "Premium South African wines",
+    "category": "Beverages",
+    "price": 45.00,
+    "available": true,
+    "image": "wine.jpg"
+  },
+  {
+    "id": "M018",
+    "name": "Craft Beer",
+    "description": "Selection of local craft beers",
+    "category": "Beverages",
+    "price": 55.00,
+    "available": true,
+    "image": "beer.jpg"
+  }
+]

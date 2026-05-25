@@ -1,0 +1,20 @@
+{
+  "restaurant": {
+    "name": "Precious Nkomose",
+    "owner": "Noluthando Magubane",
+    "phone": "+27 (0)31 563 7890",
+    "email": "info@preciousnkomose.co.za",
+    "address": "Durban, South Africa",
+    "cuisine": "South African & Seafood",
+    "established": "2015",
+    "hours": {
+      "monday": "11:00 - 23:00",
+      "tuesday": "11:00 - 23:00",
+      "wednesday": "11:00 - 23:00",
+      "thursday": "11:00 - 23:00",
+      "friday": "11:00 - 00:00",
+      "saturday": "12:00 - 00:00",
+      "sunday": "12:00 - 22:00"
+    }
+  }
+}
