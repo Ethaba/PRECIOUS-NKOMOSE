@@ -1,0 +1,1 @@
+//WE need to have the option for the user to reset their password if they forget it. This will be done by sending them an email with a link to reset their password. We will also need to have a form for the user to enter their email address to receive the reset link.

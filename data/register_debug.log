@@ -1,0 +1,10 @@
+2026-05-26T23:55:24+02:00 | ENTER register_user email=autotest+2@example.local
+2026-05-27T00:01:53+02:00 | ENTER register_user email=cli_test_1779832913@example.local
+2026-05-27T00:13:11+02:00 | ENTER register_user email=cli_test_1779833591@example.local
+2026-05-27T00:13:11+02:00 | EXIT register_user - success duration=0.126141
+2026-05-27T00:35:14+02:00 | ENTER register_user email=kwandile@gmail.com
+2026-05-27T00:35:14+02:00 | EXIT register_user - success duration=0.099496
+2026-05-27T02:40:47+02:00 | ENTER register_user email=Zama@gmail.com
+2026-05-27T02:40:48+02:00 | EXIT register_user - success duration=0.202532
+2026-06-03T14:04:57+02:00 | ENTER register_user email=SeeTest@gmail.com
+2026-06-03T14:04:57+02:00 | EXIT register_user - success duration=0.117220

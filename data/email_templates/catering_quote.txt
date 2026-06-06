@@ -1,0 +1,12 @@
+Dear {{name}},
+
+Thanks for requesting catering from {{restaurant}}.
+
+We have prepared the following quote for your event:
+
+{{quote}}
+
+If you are happy with this quote, please log into your account and accept or decline the quote in your Catering Requests area.
+
+Regards,
+{{restaurant}}

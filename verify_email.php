@@ -1,0 +1,1 @@
+// We need to have the option for the user to verify their email address after they register. This will be done by sending them an email with a link to verify their email address. We will also need to have a form for the user to enter their email address to receive the verification link.
