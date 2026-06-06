@@ -7,7 +7,7 @@
 		<p>&copy; <?= date('Y') ?> <?= sanitize(site_config()['restaurant']['name'] ?? 'Precious Nkomose') ?> — All rights reserved.</p>
 	</div>
 </footer>
-<script src="assets/js/main.js"></script>
-<script src="assets/js/site.js"></script>
+<script src="<?= sanitize(app_url('assets/js/main.js')) ?>"></script>
+<script src="<?= sanitize(app_url('assets/js/site.js')) ?>"></script>
 </body>
 </html>

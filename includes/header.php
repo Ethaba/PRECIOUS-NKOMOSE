@@ -15,6 +15,15 @@ $site = site_config();
     <link rel="stylesheet" href="<?= sanitize(app_url('assets/css/style.css')) ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script>
+        // Apply saved dark mode before the page paints, preventing a bright flash.
+        (function () {
+            var savedTheme = localStorage.getItem('pn-theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
 </head>
 <body>
 <header class="site-header">
@@ -42,6 +51,10 @@ $site = site_config();
                 <a href="<?= sanitize(app_url('login.php')) ?>">Login</a>
                 <a href="<?= sanitize(app_url('register.php')) ?>">Register</a>
             <?php endif; ?>
+            <button class="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false" data-theme-toggle>
+                <i class="fa-solid fa-moon"></i>
+                <span>Dark</span>
+            </button>
         </nav>
     </div>
 </header>
