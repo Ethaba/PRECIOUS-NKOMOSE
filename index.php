@@ -1,9 +1,5 @@
 <?php
 require_once 'includes/functions.php';
-if (!is_logged_in()) {
-    header('Location: ' . app_url('login.php'));
-    exit;
-}
 
 $pageTitle = 'Home';
 require_once 'includes/header.php';

@@ -1,6 +1,5 @@
 <?php
 require_once 'includes/functions.php';
-require_login();
 $user = current_user();
 $errors = [];
 $success = '';
@@ -12,6 +11,12 @@ $inputs = [
     'notes' => '',
 ];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!is_logged_in()) {
+        // Visitors may view the catering page, but quote requests require an account.
+        header('Location: ' . app_url('login.php'));
+        exit;
+    }
+
     foreach ($inputs as $key => $value) {
         $inputs[$key] = trim($_POST[$key] ?? '');
     }
@@ -53,20 +58,27 @@ require_once 'includes/header.php';
     <?php if ($success): ?>
         <div class="confirmation-panel"><div class="success-badge"><i class="fa-solid fa-check"></i></div><h2>Request received</h2><p><?= sanitize($success) ?></p></div>
     <?php endif; ?>
-    <form method="post" class="input-group">
-        <label class="select-label" for="event_type">Event Type</label>
-        <select class="input-select" id="event_type" name="event_type" required>
-            <option value="">Choose an event</option>
-            <option value="Wedding" <?= $inputs['event_type'] === 'Wedding' ? 'selected' : '' ?>>Wedding</option>
-            <option value="Business Function" <?= $inputs['event_type'] === 'Business Function' ? 'selected' : '' ?>>Business Function</option>
-            <option value="Formal Gathering" <?= $inputs['event_type'] === 'Formal Gathering' ? 'selected' : '' ?>>Formal Gathering</option>
-            <option value="Party" <?= $inputs['event_type'] === 'Party' ? 'selected' : '' ?>>Party</option>
-        </select>
-        <input class="input-field" type="date" name="event_date" value="<?= sanitize($inputs['event_date']) ?>" required>
-        <input class="input-field" type="number" name="guest_count" min="1" placeholder="Number of guests" value="<?= sanitize($inputs['guest_count']) ?>" required>
-        <input class="input-field" type="text" name="location" placeholder="Event location" value="<?= sanitize($inputs['location']) ?>" required>
-        <textarea class="input-textarea" id="notes" name="notes" placeholder="Tell us your catering vision" required><?= sanitize($inputs['notes']) ?></textarea>
-        <button class="button button-primary primary-action" type="submit">Request Quote</button>
-    </form>
+    <?php if (is_logged_in()): ?>
+        <form method="post" class="input-group">
+            <label class="select-label" for="event_type">Event Type</label>
+            <select class="input-select" id="event_type" name="event_type" required>
+                <option value="">Choose an event</option>
+                <option value="Wedding" <?= $inputs['event_type'] === 'Wedding' ? 'selected' : '' ?>>Wedding</option>
+                <option value="Business Function" <?= $inputs['event_type'] === 'Business Function' ? 'selected' : '' ?>>Business Function</option>
+                <option value="Formal Gathering" <?= $inputs['event_type'] === 'Formal Gathering' ? 'selected' : '' ?>>Formal Gathering</option>
+                <option value="Party" <?= $inputs['event_type'] === 'Party' ? 'selected' : '' ?>>Party</option>
+            </select>
+            <input class="input-field" type="date" name="event_date" value="<?= sanitize($inputs['event_date']) ?>" required>
+            <input class="input-field" type="number" name="guest_count" min="1" placeholder="Number of guests" value="<?= sanitize($inputs['guest_count']) ?>" required>
+            <input class="input-field" type="text" name="location" placeholder="Event location" value="<?= sanitize($inputs['location']) ?>" required>
+            <textarea class="input-textarea" id="notes" name="notes" placeholder="Tell us your catering vision" required><?= sanitize($inputs['notes']) ?></textarea>
+            <button class="button button-primary primary-action" type="submit">Request Quote</button>
+        </form>
+    <?php else: ?>
+        <div class="alert">
+            <strong>Login required for quote requests</strong>
+            You can browse catering information here. Please <a href="<?= sanitize(app_url('login.php')) ?>">login</a> or <a href="<?= sanitize(app_url('register.php')) ?>">register</a> to request a quote.
+        </div>
+    <?php endif; ?>
 </section>
 <?php require_once 'includes/footer.php';
