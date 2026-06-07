@@ -63,6 +63,6 @@ require_once __DIR__ . '/../includes/header.php';
     <?php endif; ?>
 </section>
 <?php
-// Load the shared footer from the parent includes folder.
+
 require_once __DIR__ . '/../includes/footer.php';
 
