@@ -14,7 +14,15 @@ $averageRating = round($reviewStats['average_rating'], 1);
 
 // Get only recent items (not all items)
 $catering = db_all('SELECT * FROM catering_requests ORDER BY created_at DESC LIMIT 10');
-$customers = db_all('SELECT id,name,email,phone,is_admin,created_at FROM customers ORDER BY created_at DESC LIMIT 10');
+$customerSearch = trim($_GET['customer_search'] ?? '');
+if ($customerSearch !== '') {
+    $customers = db_all(
+        'SELECT id,name,email,phone,is_admin,created_at FROM customers WHERE name LIKE ? OR email LIKE ? OR phone LIKE ? ORDER BY created_at DESC',
+        ['%' . $customerSearch . '%', '%' . $customerSearch . '%', '%' . $customerSearch . '%']
+    );
+} else {
+    $customers = db_all('SELECT id,name,email,phone,is_admin,created_at FROM customers ORDER BY created_at DESC LIMIT 10');
+}
 
 $reservationSegments = [
     ['label' => 'Confirmed', 'value' => $confirmedReservations, 'color' => '#22c55e'],
@@ -151,6 +159,38 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
         </div>
     </div>
+</section>
+
+<section class="card" style="margin-top:24px;">
+    <div class="section-title">
+        <div>
+            <h2>Customer records</h2>
+            <p>Search and review registered customer accounts.</p>
+        </div>
+        <a class="button button-ghost" href="reports.php">Open reports</a>
+    </div>
+    <form method="get" class="input-group" style="margin-bottom:16px;">
+        <input class="input-field" type="search" name="customer_search" value="<?= sanitize($customerSearch) ?>" placeholder="Search customers by name, email, or phone">
+        <button class="button button-primary" type="submit">Search</button>
+    </form>
+    <?php if (empty($customers)): ?>
+        <div class="alert">No customer records found.</div>
+    <?php else: ?>
+        <table class="table">
+            <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th></tr></thead>
+            <tbody>
+                <?php foreach ($customers as $customer): ?>
+                    <tr>
+                        <td><?= sanitize($customer['id'] ?? '') ?></td>
+                        <td><?= sanitize($customer['name'] ?? '') ?></td>
+                        <td><?= sanitize($customer['email'] ?? '') ?></td>
+                        <td><?= sanitize($customer['phone'] ?? '') ?></td>
+                        <td><?= !empty($customer['is_admin']) ? 'Admin' : 'Customer' ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
 </section>
 
 <section class="analytics-grid">

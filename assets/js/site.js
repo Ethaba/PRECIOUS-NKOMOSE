@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var sectionCards = document.querySelectorAll('.section-card');
     var sectionItems = document.querySelectorAll('.section-list-item');
     var preferredInput = document.querySelector('#preferredSection');
+    var selectedSectionText = document.querySelector('#preferredSectionText');
     var sectionSelect = document.querySelector('#preferredSectionSelect');
     var guestInput = document.querySelector('#guestCount') || document.querySelector('#guests');
     var notesInput = document.querySelector('#seatNotes') || document.querySelector('#notes');
@@ -25,12 +26,29 @@ document.addEventListener('DOMContentLoaded', function() {
         nextButton.disabled = !(hasSection && hasGuests && hasNotes);
     }
 
+    function syncSelectedSectionDisplay(id) {
+        if (!selectedSectionText) return;
+
+        var matchedCard = Array.prototype.find.call(sectionCards, function(card) {
+            return card.dataset.sectionId === id;
+        });
+
+        if (matchedCard && matchedCard.dataset.sectionLabel) {
+            selectedSectionText.value = matchedCard.dataset.sectionLabel;
+        } else if (id) {
+            selectedSectionText.value = id;
+        } else {
+            selectedSectionText.value = 'None selected';
+        }
+    }
+
     if (sectionSelect) {
         sectionSelect.addEventListener('change', function() {
             var id = sectionSelect.value;
             if (preferredInput) preferredInput.value = id;
             updateReservationControls();
             highlightSection(id);
+            syncSelectedSectionDisplay(id);
         });
     }
 
@@ -43,6 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (sectionSelect) sectionSelect.value = id;
             if (preferredInput) preferredInput.value = id;
             highlightSection(id);
+            syncSelectedSectionDisplay(id);
             updateReservationControls();
             item.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
@@ -55,6 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (sectionSelect) sectionSelect.value = id;
             if (preferredInput) preferredInput.value = id;
             highlightSection(id);
+            syncSelectedSectionDisplay(id);
             updateReservationControls();
             card.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
@@ -77,6 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (sectionSelect) sectionSelect.value = id;
                     if (preferredInput) preferredInput.value = id;
                     highlightSection(id);
+                    syncSelectedSectionDisplay(id);
                     updateReservationControls();
                 }
             });

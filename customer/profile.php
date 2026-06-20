@@ -15,20 +15,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (isset($_POST['update_profile'])) {
         $name = trim($_POST['name'] ?? '');
         $phone = trim($_POST['phone'] ?? '');
+        $email = trim($_POST['email'] ?? '');
         if ($name === '') {
             $errors[] = 'Enter your name.';
         }
         if ($phone === '') {
             $errors[] = 'Enter your phone number.';
         }
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Enter a valid email address.';
+        }
         if (empty($errors)) {
-            if (update_customer_profile($user['id'], $name, $phone)) {
+            if (update_customer_profile($user['id'], $name, $phone, $email)) {
                 $user['name'] = $name;
                 $user['phone'] = $phone;
+                $user['email'] = $email;
                 $_SESSION['user'] = $user;
                 $success = 'Your profile was updated successfully.';
             } else {
-                $errors[] = 'Unable to save your profile. Please try again later.';
+                $errors[] = 'Unable to save your profile. The email may already be in use.';
+            }
+        }
+    } elseif (isset($_POST['update_password'])) {
+        $currentPassword = $_POST['current_password'] ?? '';
+        $newPassword = $_POST['new_password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
+        if ($currentPassword === '') {
+            $errors[] = 'Enter your current password.';
+        }
+        if ($newPassword === '' || strlen($newPassword) < 6) {
+            $errors[] = 'New password must be at least 6 characters long.';
+        }
+        if ($newPassword !== $confirmPassword) {
+            $errors[] = 'New password and confirmation do not match.';
+        }
+        if (empty($errors)) {
+            $result = update_customer_password($user['id'], $currentPassword, $newPassword);
+            if (!empty($result['error'])) {
+                $errors[] = $result['error'];
+            } else {
+                $success = 'Your password has been updated successfully.';
             }
         }
     }
@@ -100,7 +126,7 @@ require_once __DIR__ . '/../includes/header.php';
 <section class="card">
     <div class="section-title">
         <h3>Account details</h3>
-        <p>Edit your visible name and phone number.</p>
+        <p>Edit your name, email, and phone number.</p>
     </div>
     <form method="post" class="input-group">
         <div class="field">
@@ -109,13 +135,34 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
         <div class="field">
             <label for="email">Email</label>
-            <input class="input-field" type="email" id="email" name="email" value="<?= sanitize($user['email'] ?? '') ?>" readonly>
+            <input class="input-field" type="email" id="email" name="email" value="<?= sanitize($user['email'] ?? '') ?>" required>
         </div>
         <div class="field">
             <label for="phone">Phone</label>
             <input class="input-field" type="text" id="phone" name="phone" value="<?= sanitize($user['phone'] ?? '') ?>" required>
         </div>
         <button class="button button-primary" type="submit" name="update_profile">Save profile</button>
+    </form>
+</section>
+<section class="card" style="margin-top:24px;">
+    <div class="section-title">
+        <h3>Change password</h3>
+        <p>Update your password regularly to keep your account secure.</p>
+    </div>
+    <form method="post" class="input-group">
+        <div class="field">
+            <label for="current_password">Current password</label>
+            <input class="input-field" type="password" id="current_password" name="current_password" required>
+        </div>
+        <div class="field">
+            <label for="new_password">New password</label>
+            <input class="input-field" type="password" id="new_password" name="new_password" required>
+        </div>
+        <div class="field">
+            <label for="confirm_password">Confirm new password</label>
+            <input class="input-field" type="password" id="confirm_password" name="confirm_password" required>
+        </div>
+        <button class="button button-primary" type="submit" name="update_password">Update password</button>
     </form>
 </section>
 <section class="card" style="margin-top:24px;">

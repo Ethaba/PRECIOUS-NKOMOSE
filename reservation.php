@@ -12,14 +12,23 @@ $booking = [
 ];
 $selectedSectionLabel = '';
 
-$sections = [
-    ['id' => 'corner-nw', 'label' => 'Corner Bench North West', 'capacity' => 6, 'description' => 'Cozy padded bench seating with a private finish.'],
-    ['id' => 'corner-ne', 'label' => 'Corner Bench North East', 'capacity' => 6, 'description' => 'Bright corner seating with a warm restaurant view.'],
-    ['id' => 'corner-sw', 'label' => 'Corner Bench South West', 'capacity' => 6, 'description' => 'Curtained semi-private seating for groups of six.'],
-    ['id' => 'corner-se', 'label' => 'Corner Bench South East', 'capacity' => 6, 'description' => 'Soft bench seating with a luxurious feel.'],
-    ['id' => 'center-left', 'label' => 'Center Round Table A', 'capacity' => 4, 'description' => 'Intimate round table in the heart of the room.'],
-    ['id' => 'center-right', 'label' => 'Center Round Table B', 'capacity' => 4, 'description' => 'Shared center table ideal for seafood feasts.' ],
-    ['id' => 'whole-venue', 'label' => 'Entire Venue', 'capacity' => 120, 'description' => 'Reserve the whole restaurant for private events, parties and special celebrations.'],
+$dbSections = db_all('SELECT id,label,capacity,description,is_active FROM restaurant_tables ORDER BY label');
+$sections = [];
+foreach ($dbSections as $row) {
+    if (!empty($row['is_active'])) {
+        $sections[] = [
+            'id' => (string)$row['id'],
+            'label' => (string)$row['label'],
+            'capacity' => (int)$row['capacity'],
+            'description' => (string)($row['description'] ?? ''),
+        ];
+    }
+}
+$sections[] = [
+    'id' => 'whole-venue',
+    'label' => 'Entire Venue',
+    'capacity' => 120,
+    'description' => 'Reserve the whole restaurant for private events, parties and special celebrations.',
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

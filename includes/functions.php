@@ -94,6 +94,27 @@ function next_id(string $table, string $prefix, int $length = 4): string
     return $prefix . str_pad((string)($lastNumber + 1), $length, '0', STR_PAD_LEFT);
 }
 
+function table_has_column(string $table, string $column): bool
+{
+    $rows = db_all('SHOW COLUMNS FROM ' . $table);
+    foreach ($rows as $row) {
+        if (($row['Field'] ?? '') === $column) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function ensure_customer_verification_columns(): void
+{
+    if (!table_has_column('customers', 'email_verified')) {
+        db_execute('ALTER TABLE customers ADD COLUMN email_verified TINYINT(1) NOT NULL DEFAULT 0');
+    }
+    if (!table_has_column('customers', 'verification_token')) {
+        db_execute('ALTER TABLE customers ADD COLUMN verification_token VARCHAR(255) DEFAULT NULL');
+    }
+}
+
 function sanitize($value)
 {
     return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
@@ -279,6 +300,8 @@ function register_user(string $name, string $email, string $phone, string $passw
     @error_log(sprintf("%s | ENTER register_user email=%s\n", date('c'), $email), 3, $log);
 
     try {
+        ensure_customer_verification_columns();
+
         // Registration now checks and saves customer accounts in the customers table.
         $existing = db_one('SELECT id FROM customers WHERE email = ?', [$email]);
         if ($existing) {
@@ -289,7 +312,7 @@ function register_user(string $name, string $email, string $phone, string $passw
         $id = next_id('customers', 'U', 4);
         $hash = password_hash($password, PASSWORD_DEFAULT);
         $saved = db_execute(
-            'INSERT INTO customers (id,name,email,phone,password,is_admin,created_at) VALUES (?,?,?,?,?,0,NOW())',
+            'INSERT INTO customers (id,name,email,phone,password,is_admin,email_verified,verification_token,created_at) VALUES (?,?,?,?,?,0,0,NULL,NOW())',
             [$id, $name, $email, $phone, $hash]
         );
 
@@ -297,6 +320,8 @@ function register_user(string $name, string $email, string $phone, string $passw
             @error_log(sprintf("%s | EXIT register_user - save_failed\n", date('c')), 3, $log);
             return ['error' => 'Unable to save user data.'];
         }
+
+        send_verification_email($id, $email, $name);
 
         $duration = microtime(true) - $start;
         @error_log(sprintf("%s | EXIT register_user - success duration=%.6f\n", date('c'), $duration), 3, $log);
@@ -307,11 +332,66 @@ function register_user(string $name, string $email, string $phone, string $passw
     }
 }
 
+function generate_verification_token(): string
+{
+    return bin2hex(random_bytes(32));
+}
+
+function send_verification_email(string $customerId, string $email, string $name): bool
+{
+    ensure_customer_verification_columns();
+    $token = generate_verification_token();
+    $updated = db_execute(
+        'UPDATE customers SET verification_token = ? WHERE id = ?',
+        [$token, $customerId]
+    );
+
+    if (!$updated) {
+        return false;
+    }
+
+    $verifyUrl = app_url('verify_email.php?token=' . urlencode($token));
+    $body = "Hello {$name},\n\nPlease verify your email address by visiting:\n{$verifyUrl}\n\nIf you did not create this account, you can ignore this message.\n\nRegards,\nPrecious Nkomose";
+    return send_system_email($email, 'Verify your email address', $body);
+}
+
+function verify_email_token(string $token): array
+{
+    ensure_customer_verification_columns();
+
+    if (!table_has_column('customers', 'email_verified') || !table_has_column('customers', 'verification_token')) {
+        return ['error' => 'Database verification columns are not available yet.'];
+    }
+
+    $customer = db_one(
+        'SELECT id,name,email FROM customers WHERE verification_token = ? AND email_verified = 0',
+        [$token]
+    );
+
+    if (!$customer) {
+        return ['error' => 'This verification link is invalid or has already been used.'];
+    }
+
+    $ok = db_execute(
+        'UPDATE customers SET email_verified = 1, verification_token = NULL WHERE id = ?',
+        [$customer['id']]
+    );
+
+    if (!$ok) {
+        return ['error' => 'Unable to verify your email address right now.'];
+    }
+
+    return ['success' => true, 'customer' => $customer];
+}
+
 function login_user(string $email, string $password): array
 {
     // Login now reads the stored password hash from MySQL.
-    // Avoid wrapping the `email` column in LOWER() to allow index usage.
-    $user = db_one('SELECT id,name,email,phone,password,is_admin,created_at FROM customers WHERE email = ?', [$email]);
+    // Keep the query compatible with older databases that do not yet have verification columns.
+    $user = db_one(
+        'SELECT id,name,email,phone,password,is_admin,created_at FROM customers WHERE email = ?',
+        [$email]
+    );
     if (!$user || !isset($user['password']) || !password_verify($password, $user['password'])) {
         return ['error' => 'Invalid email or password.'];
     }
@@ -323,15 +403,52 @@ function login_user(string $email, string $password): array
 
 function get_customer_by_id(string $customerId)
 {
-    return db_one('SELECT id,name,email,phone,is_admin,created_at FROM customers WHERE id = ?', [$customerId]);
+    return db_one(
+        'SELECT id,name,email,phone,is_admin,created_at FROM customers WHERE id = ?',
+        [$customerId]
+    );
 }
 
-function update_customer_profile(string $customerId, string $name, string $phone): bool
+function update_customer_profile(string $customerId, string $name, string $phone, string $email): bool
 {
-    return db_execute(
-        'UPDATE customers SET name = ?, phone = ? WHERE id = ?',
-        [$name, $phone, $customerId]
+    ensure_customer_verification_columns();
+
+    $existing = db_one(
+        'SELECT id FROM customers WHERE email = ? AND id <> ?',
+        [$email, $customerId]
     );
+    if ($existing) {
+        return false;
+    }
+
+    $updated = db_execute(
+        'UPDATE customers SET name = ?, phone = ?, email = ?, email_verified = 0, verification_token = NULL WHERE id = ?',
+        [$name, $phone, $email, $customerId]
+    );
+
+    if ($updated) {
+        send_verification_email($customerId, $email, $name);
+    }
+
+    return $updated;
+}
+
+function update_customer_password(string $customerId, string $currentPassword, string $newPassword): array
+{
+    $user = db_one('SELECT password FROM customers WHERE id = ?', [$customerId]);
+    if (!$user || !password_verify($currentPassword, $user['password'])) {
+        return ['error' => 'Your current password is incorrect.'];
+    }
+
+    if (strlen($newPassword) < 6) {
+        return ['error' => 'New password must be at least 6 characters long.'];
+    }
+
+    if (!db_execute('UPDATE customers SET password = ? WHERE id = ?', [password_hash($newPassword, PASSWORD_DEFAULT), $customerId])) {
+        return ['error' => 'Unable to update your password right now.'];
+    }
+
+    return ['success' => true];
 }
 
 function logout_user(): void
@@ -361,6 +478,36 @@ function get_customer_reservations(string $customerId): array
 {
     // Customer dashboards only show reservations that belong to the logged-in customer.
     return db_all('SELECT * FROM reservations WHERE customer_id = ? ORDER BY date DESC,time DESC,created_at DESC', [$customerId]);
+}
+
+function update_reservation(string $reservationId, array $data): bool
+{
+    $allowed = ['status', 'date', 'time', 'guests', 'notes', 'preferred_section', 'section_label', 'capacity'];
+    foreach ($data as $key => $value) {
+        if (!in_array($key, $allowed, true)) {
+            unset($data[$key]);
+        }
+    }
+
+    return db_execute(
+        'UPDATE reservations SET status = ?, date = ?, time = ?, guests = ?, notes = ?, preferred_section = ?, section_label = ?, capacity = ? WHERE id = ?',
+        [
+            $data['status'] ?? 'Confirmed',
+            $data['date'] ?? '',
+            $data['time'] ?? '00:00:00',
+            (int)($data['guests'] ?? 0),
+            $data['notes'] ?? '',
+            $data['preferred_section'] ?? '',
+            $data['section_label'] ?? '',
+            (int)($data['capacity'] ?? 0),
+            $reservationId,
+        ]
+    );
+}
+
+function delete_reservation(string $reservationId): bool
+{
+    return db_execute('DELETE FROM reservations WHERE id = ?', [$reservationId]);
 }
 
 function reservation_slot_taken(string $sectionId, string $date, string $time): bool
@@ -518,6 +665,39 @@ function cancel_customer_reservation(string $reservationId, string $customerId):
     );
 }
 
+function create_table_entry(array $table): bool
+{
+    return db_execute(
+        'INSERT INTO restaurant_tables (id,label,capacity,description,is_active) VALUES (?,?,?,?,?)',
+        [
+            $table['id'] ?? next_id('restaurant_tables', 'T', 3),
+            $table['label'] ?? '',
+            (int)($table['capacity'] ?? 0),
+            $table['description'] ?? '',
+            !empty($table['is_active']) ? 1 : 0,
+        ]
+    );
+}
+
+function update_table_entry(string $id, array $table): bool
+{
+    return db_execute(
+        'UPDATE restaurant_tables SET label = ?, capacity = ?, description = ?, is_active = ? WHERE id = ?',
+        [
+            $table['label'] ?? '',
+            (int)($table['capacity'] ?? 0),
+            $table['description'] ?? '',
+            !empty($table['is_active']) ? 1 : 0,
+            $id,
+        ]
+    );
+}
+
+function delete_table_entry(string $id): bool
+{
+    return db_execute('DELETE FROM restaurant_tables WHERE id = ?', [$id]);
+}
+
 // Review helpers
 function get_reviews(): array
 {
@@ -564,11 +744,21 @@ function create_catering_request(array $request): bool
 // Email logging / system emails
 function send_system_email(string $to, string $subject, string $body): bool
 {
-    // The project logs system emails in MySQL; it does not send real email yet.
-    return db_execute(
+    // Log the message in the database for audit purposes.
+    $inserted = db_execute(
         'INSERT INTO emails (id,recipient,subject,body,sent_at) VALUES (?,?,?,?,NOW())',
         [next_id('emails', 'E', 4), $to, $subject, $body]
     );
+
+    // Try a real outbound send when PHP mail is available.
+    $headers = "MIME-Version: 1.0\r\n" .
+        "Content-type: text/plain; charset=UTF-8\r\n" .
+        "From: no-reply@preciousnkomose.local\r\n" .
+        "X-Mailer: PHP/" . phpversion();
+
+    @mail($to, $subject, $body, $headers);
+
+    return (bool)$inserted;
 }
 
 // Simple templated email sender wrapper (uses send_system_email for now)

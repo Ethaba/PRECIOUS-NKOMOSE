@@ -22,6 +22,8 @@ CREATE TABLE `customers` (
   `phone` VARCHAR(60) DEFAULT NULL,
   `password` VARCHAR(255) NOT NULL,
   `is_admin` TINYINT(1) NOT NULL DEFAULT 0,
+  `email_verified` TINYINT(1) NOT NULL DEFAULT 0,
+  `verification_token` VARCHAR(255) DEFAULT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_customers_email` (`email`)

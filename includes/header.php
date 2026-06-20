@@ -30,7 +30,9 @@ $site = site_config();
     <div class="container header-inner">
         <!-- Shared header links use app_url so subfolder pages do not break navigation. -->
         <a class="brand" href="<?= sanitize(app_url('index.php')) ?>">
-            <span class="brand-mark">P</span>
+            <span class="brand-mark">
+                <img src="<?= sanitize(app_url('assets/images/logo/logo.png')) ?>" alt="Precious Nkomose logo">
+            </span>
             <span class="brand-copy">
                 <span class="brand-title">Precious Nkomose</span>
                 <span class="brand-subtitle">Lounge / Lifestyle Experience</span>
