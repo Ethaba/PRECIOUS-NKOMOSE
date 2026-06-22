@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($result['error'])) {
             $errors[] = $result['error'];
         } else {
-            flash_set('Your account was created successfully. Please log in to continue.', 'success');
+            flash_set('Your account was created. A verification email has been sent — please check your inbox before logging in.', 'success');
             header('Location: ' . app_url('login.php'));
             exit;
         }

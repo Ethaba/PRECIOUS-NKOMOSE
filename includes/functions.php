@@ -389,11 +389,16 @@ function login_user(string $email, string $password): array
     // Login now reads the stored password hash from MySQL.
     // Keep the query compatible with older databases that do not yet have verification columns.
     $user = db_one(
-        'SELECT id,name,email,phone,password,is_admin,created_at FROM customers WHERE email = ?',
+        'SELECT id,name,email,phone,password,is_admin,created_at,email_verified FROM customers WHERE email = ?',
         [$email]
     );
     if (!$user || !isset($user['password']) || !password_verify($password, $user['password'])) {
         return ['error' => 'Invalid email or password.'];
+    }
+
+    // If the database has an email_verified column, prevent login until verified.
+    if (array_key_exists('email_verified', $user) && (int)($user['email_verified'] ?? 0) === 0) {
+        return ['error' => 'Please verify your email address before logging in.'];
     }
 
     unset($user['password']);
