@@ -12,6 +12,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PreciousNkomose">
         <activity
+            android:name=".reserve_table"
+            android:exported="false" />
+        <activity
+            android:name=".PickTableActivity"
+            android:exported="false" />
+        <activity
+            android:name=".menu"
+            android:exported="false" />
+        <activity
+            android:name=".home"
+            android:exported="false" />
+        <activity
             android:name=".RegisterActivity"
             android:exported="false" />
         <activity
